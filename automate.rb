@@ -35,10 +35,15 @@ class LeekAPI
 		if r['success'] then
 			return r['garden']
 		else
+			puts r
 			raise r
 		end
 	end
 
+	def leeks
+		return @leeks if @leeks
+		@leeks = garden['leeks'].map{|leek|leek['id']}
+	end
 	def get_old(rest, send_token=true, token = "")
 		url = "http://leekwars.com/api/#{rest}"
 		token = (token.length > 0) ? token : @token
