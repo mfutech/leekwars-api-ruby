@@ -16,6 +16,8 @@ class LeekAPI
 	attr_accessor :http, :token, :cookies
 	def initialize(token = nil)
 		@token = token
+		@garden = nil
+		@leeks = nil
 		start
 	end
 	
@@ -26,6 +28,15 @@ class LeekAPI
 	
 	def finish()
 		@http.finish
+	end
+
+	def garden
+		r = get 'garden/get'
+		if r['success'] then
+			return r['garden']
+		else
+			raise r
+		end
 	end
 
 	def get_old(rest, send_token=true, token = "")
@@ -77,7 +88,8 @@ class LeekAPI
 		if res['success'] then
 			return res
 		else
-			raise res['error']
+			@last_err = res
+			return nil
 		end
 	end
 
