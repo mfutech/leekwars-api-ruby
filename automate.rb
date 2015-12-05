@@ -1,6 +1,6 @@
 
 require 'json'
-require 'rest-client'
+#require 'rest-client'
 require 'net/http'
 
 pass = ENV['P']
@@ -73,8 +73,8 @@ class LeekAPI
 	end
 	#r_init = JSON.parse RestClient.get("http://leekwars.com/api/farmer/login-token/#{login}/#{pass}")
 	#token = r_init['token']
-	def login_old(login,pass)
-		res = @http.get("farmer/login-token/#{login}/#{pass}")
+	def login(login,pass)
+		res = get "farmer/login-token/#{login}/#{pass}", false
 		@token = res['token']
 	end
 	
@@ -122,7 +122,6 @@ class LeekAPI
 	end
 	def do_farmer_fights
 		while true do
-			garden = get('garden/get')['garden']
 			enemies = garden['farmer_enemies']
 			break unless enemies.length > 0
 			en = enemies.first
@@ -153,6 +152,8 @@ def do_all(tokens)
 		api = LeekAPI.new token
 		puts "--- Farmer fight"
 		api.do_farmer_fights
+		puts "--- Team fight"
+		api.do_team_fights
 		puts "--- Solo fight"
 		garden = api.get('garden/get')['garden']
 		garden['leeks'].each do |leek|
@@ -164,5 +165,20 @@ def do_all(tokens)
 	true
 end
 
+def do_register(tokens)
+	tokens.each do |farmer, token| 
+		puts "--- Farmer: #{farmer} ---------"
+		api = LeekAPI.new token
+		puts "--- register-tournament"
+		api.get "farmer/register-tournament"
+		api.leeks.each do |leek|
+			api.get "leek/register-tournament/#{leek}"
+		end
+		api.garden['my_compositions'].map{|x|x['id']}.each do |compo_id|
+			puts "--- register-team #{compo_id}"
+			api.get "team/register-tournament/#{compo_id}"
+		end
+	end
+end
 ### http://pastebin.com/czf4XivU
 	
