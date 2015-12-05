@@ -1,5 +1,10 @@
 CHANGELOG
 
+new script to update token in config file
+token in a dedicated config file
+separated LeekAPI class in separate file
+corrected bug in do_team_fights
+-
 corrected bug in do_farmer_fights
 corrected login method
 created CHANGELOG file

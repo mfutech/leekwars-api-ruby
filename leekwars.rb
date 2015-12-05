@@ -122,16 +122,17 @@ class LeekAPI
 	end
 
 	def do_team_fights
-		while true do
-			garden = get('garden/get')['garden']
-			enemies = garden['enemies_compositions']
-			puts enemies
-			break unless enemies.length > 0
-			enemies.each do |composition, en_compositions|
-				puts composition
-				en = en_compositions.first
-				r = get "garden/start-team-fight/#{composition}/#{en['id']}"
-				puts r				
+		garden['my_compositions'].each do |composition|
+			while true do
+				garden = get('garden/get')['garden']
+				enemies = garden['enemies_compositions'][composition]
+				break unless enemies
+				enemies.each do |composition, en_compositions|
+					puts composition
+					en = en_compositions.first
+					r = get "garden/start-team-fight/#{composition}/#{en['id']}"
+					puts r				
+				end
 			end
 		end
 	end
