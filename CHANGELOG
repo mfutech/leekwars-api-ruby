@@ -1,5 +1,7 @@
 CHANGELOG
 
+added logging to automate.rb
+-
 new script to update token in config file
 token in a dedicated config file
 separated LeekAPI class in separate file
