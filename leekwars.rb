@@ -122,15 +122,16 @@ class LeekAPI
 	end
 
 	def do_team_fights
+		failed = 0 ## max number of failed figth submission
 		garden['my_compositions'].each do |composition|
-			while true do
-				garden = get('garden/get')['garden']
-				enemies = garden['enemies_compositions'][composition]
+			compo_id = composition['id']
+			for i in (1..20) do  ## do 20 fights at most 
+				enemies = garden['enemies_compositions'][compo_id.to_s]
 				break unless enemies
-				enemies.each do |composition, en_compositions|
-					puts composition
-					en = en_compositions.first
-					r = get "garden/start-team-fight/#{composition}/#{en['id']}"
+				enemies.each do |enemy|
+					r = get "garden/start-team-fight/#{compo_id}/#{enemy['id']}"
+					failed += 1 unless r['success']
+					break if failed > 20
 					puts r				
 				end
 			end

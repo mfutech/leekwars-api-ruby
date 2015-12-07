@@ -1,5 +1,9 @@
 CHANGELOG
+---------
 
+
+corrected bug in do_team_fights
+--
 added logging to automate.rb
 -
 new script to update token in config file
