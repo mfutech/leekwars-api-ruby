@@ -1,7 +1,8 @@
 CHANGELOG
 ---------
 
-
+added a script to check token validity
+--
 corrected bug in do_team_fights
 --
 added logging to automate.rb
