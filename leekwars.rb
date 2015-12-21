@@ -87,6 +87,26 @@ class LeekAPI
 			return nil
 		end
 	end
+	
+	def post(rest, data, send_token=true, token = "")
+		req = Net::HTTP::Post.new URI("#{BASE_URI}/api/#{rest}")
+		token = (token.length > 0) ? token : @token
+		data['token'] = token unless data.has_key? 'token'
+		req['Cookie'] = @cookies if @cookies
+		req.form_data = data
+		#puts uri, headers
+		resp = @http.request req	
+		c = resp.to_hash['set-cookie']
+		@cookies = @cookies.to_s + c.collect{|ea|ea[/^.*?;/]}.join if c
+		res = JSON.parse resp.body
+		return res
+		if res['success'] then
+			return res
+		else
+			@last_err = res
+			return nil
+		end
+	end
 
 	def do_solo_fight(leek_id)
 		garden = get('garden/get')['garden']
@@ -136,5 +156,21 @@ class LeekAPI
 				end
 			end
 		end
+	end
+	
+	def test(leek_id, ai_id, bots={'leek1'=>2}, type='solo')
+		data = {}
+		data['leek_id'] = leek_id.to_s
+		data['ai_id'] = ai_id.to_s
+		bots.each do |leek, bot_id|
+			data["bots[#{leek}]"] = bot_id
+		end
+		data['type'] = 'solo'
+		res = post 'ai/test', data
+	end
+	
+	def ais
+		res = get 'ai/get-farmer-ais'
+		res['success'] ? res['ais'] : nil
 	end
 end

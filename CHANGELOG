@@ -1,6 +1,10 @@
 CHANGELOG
 ---------
 
+--
+added post method
+added test method
+--
 added a script to check token validity
 --
 corrected bug in do_team_fights
