@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## beta 006
+- created a schedule script, base on rufus scheduler
+- Dockerfile for creating a Docker image
+- Rakefile & Gemfile
+
 ## beta 0005
 - created README.md, with some explanation on what is in this package
 - put CHANGELOD in markdown format
