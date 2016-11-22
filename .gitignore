@@ -2,3 +2,4 @@ config.yml
 tests.*
 log.txt
 err.txt
+*~
