@@ -4,11 +4,12 @@ require 'openssl'
 
 class LeekAPI
   LeekAPI::BASE_URI = URI("https://leekwars.com")
-  attr_accessor :http, :token, :cookies
+  attr_accessor :http, :token, :cookies, :farmer
   def initialize(token = nil)
     @token = token
     @garden = nil
     @leeks = nil
+	@farmer = nil
     start
   end
   
@@ -36,8 +37,14 @@ class LeekAPI
   
   def leeks
     return @leeks if @leeks
-    @leeks = garden['leeks'].map{|leek|leek['id']}
+    @leeks = farmer['leeks'].map{|leek_id,leek| leek_id}
   end
+
+  def farmer
+    return @farmer if @farmer
+	@farmer = (get 'farmer/get-from-token')['farmer']
+  end
+  
   def get_old(rest, send_token=true, token = "")
     url = "http://leekwars.com/api/#{rest}"
     token = (token.length > 0) ? token : @token
@@ -94,10 +101,11 @@ class LeekAPI
   end
 
   def do_solo_fight(leek_id)
-    garden = get('garden/get')['garden']
-    targets = garden['solo_enemies'][leek_id.to_s]
-    return nil unless targets.length > 0
-    target_id = targets.first['id']
+    #garden = get('garden/get')['garden']
+    #targets = garden['solo_enemies'][leek_id.to_s]
+	opponents = get( "garden/get-leek-opponents/#{leek_id}" )['opponents']
+    return nil unless opponents.length > 0
+    target_id = opponents.first['id']
     r = get "garden/start-solo-fight/#{leek_id}/#{target_id}"
     #r = api.post "garden/start-solo-fight", data
     puts r
@@ -118,9 +126,10 @@ class LeekAPI
   def do_farmer_fights
     while true do
       enemies = garden['farmer_enemies']
-      break unless enemies.length > 0
-      en = enemies.first
-      r = get "garden/start-farmer-fight/#{en['id']}"
+	  opponents = get( "garden/get-farmer-opponents" )['opponents']
+      break unless opponents.length > 0
+      farmer_id = opponents.first['id']
+      r = get "garden/start-farmer-fight/#{farmer_id}"
       #r = api.post "garden/start-solo-fight", data
       puts r
     end
@@ -131,14 +140,15 @@ class LeekAPI
     garden['my_compositions'].each do |composition|
       compo_id = composition['id']
       for i in (1..20) do  ## do 20 fights at most 
-	enemies = garden['enemies_compositions'][compo_id.to_s]
-	break unless enemies
-	enemies.each do |enemy|
-	  r = get "garden/start-team-fight/#{compo_id}/#{enemy['id']}"
-	  failed += 1 unless r['success']
-	  break if failed > 20
-	  puts r				
-	end
+		#enemies = garden['enemies_compositions'][compo_id.to_s]
+		opponents = get( "garden/get-composition-opponents/#{compo_id}" )['opponents']
+		break unless opponents
+		opponents.each do |opponent|
+		  r = get "garden/start-team-fight/#{compo_id}/#{opponent['id']}"
+		  failed += 1 unless r['success']
+		  break if failed > 20
+		  puts r				
+		end
       end
     end
   end

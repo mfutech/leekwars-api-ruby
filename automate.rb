@@ -26,9 +26,8 @@ def do_all(tokens)
 		api.do_team_fights
 		puts "--- Solo fight"
 		##garden = api.get('garden/get')['garden']
-		api.garden['leeks'].each do |leek|
-			leek_id = leek['id']
-			while api.do_solo_fight(leek_id) do
+		api.leeks.each do |leek|
+			while api.do_solo_fight(leek) do
 			end
 		end
 	end
