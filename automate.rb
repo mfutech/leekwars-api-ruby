@@ -1,20 +1,11 @@
 #!/usr/bin/ruby
 BASEDIR = File.dirname(__FILE__)
 $: << BASEDIR
-$stderr.reopen File.join(BASEDIR, "err.txt"), "a"
-$stdout.reopen File.join(BASEDIR, "log.txt"), "a"
-
-puts "-" * 60
-puts Time.new
 
 require 'leekwars'
-
 require 'yaml'
 
 CONFIG_FILE = File.join File.dirname(__FILE__), 'config.yml'
-config = YAML.load File.open(CONFIG_FILE)
-
-tokens = config[:tokens]
 
 def do_all(tokens)
 	tokens.each do |farmer, token| 
@@ -50,6 +41,14 @@ def do_register(tokens)
 	end
 end
 
-do_all tokens
-do_register tokens
+if __FILE__ == $0 then
+	$stderr.reopen File.join(BASEDIR, "err.txt"), "a"
+	$stdout.reopen File.join(BASEDIR, "log.txt"), "a"
+	config = YAML.load File.open(CONFIG_FILE)
+	tokens = config[:tokens]
+	puts "-" * 60
+	puts Time.new
+	do_all tokens
+	do_register tokens
+end
 

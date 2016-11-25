@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## beta 007
+- reused automate.rb in scheduler.rb
+
 ## beta 006
 - created a schedule script, base on rufus scheduler
 - Dockerfile for creating a Docker image
