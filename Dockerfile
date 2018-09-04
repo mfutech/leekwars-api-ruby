@@ -1,6 +1,9 @@
 FROM alpine:3.3
 MAINTAINER Mfu Tech <mfutech@gmail.com>
 
+## working TimeZone
+ENV TZ Europe/Zurich
+
 ## required package for ruby and gems dependencies
 ENV RUBY_PACKAGES ruby ruby-bundler ruby-io-console ruby-bigdecimal ruby-json
 
@@ -10,7 +13,7 @@ RUN apk update && \
 	# correct timezone (we will use crontab)
 	apk add tzdata && \
 	cp /usr/share/zoneinfo/Europe/Zurich  /etc/localtime && \
-    echo "Europe/Zurich" > /etc/timezone && \
+    echo "$TZ" > /etc/timezone && \
 	apk del tzdata && \
 	# add ruby package
 	apk add $RUBY_PACKAGES && \
