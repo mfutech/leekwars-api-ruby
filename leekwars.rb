@@ -1,15 +1,18 @@
 require 'json'
 require 'net/http'
 require 'openssl'
+require 'http-cookie'
 
 class LeekAPI
   LeekAPI::BASE_URI = URI("https://leekwars.com")
-  attr_accessor :http, :token, :cookies, :farmer
+  attr_accessor :http, :token, :jar, :farmer
+
   def initialize(token = nil)
     @token = token
     @garden = nil
     @leeks = nil
-	@farmer = nil
+    @farmer = nil
+    @jar = HTTP::CookieJar.new
     start
   end
   
@@ -27,12 +30,8 @@ class LeekAPI
   
   def garden
     r = get 'garden/get'
-    if r['success'] then
-      return r['garden']
-    else
-      puts r
-      raise r
-    end
+    return r if r 
+    raise r
   end
   
   def leeks
@@ -42,7 +41,7 @@ class LeekAPI
 
   def farmer
     return @farmer if @farmer
-	@farmer = (get 'farmer/get-from-token')['farmer']
+	  @farmer = (get 'farmer/get-from-token')['farmer']
   end
   
   def get_old(rest, send_token=true, token = "")
@@ -78,32 +77,55 @@ class LeekAPI
   def login(login,pass)
     res = get "farmer/login-token/#{login}/#{pass}", false
     @token = res['token']
+    return @token != nil
   end
   
   def get(rest, send_token=true, token = "")
-    uri = "/api/#{rest}"
+    url = "https://leekwars.com/api/#{rest}"
+
     token = (token.length > 0) ? token : @token
-    uri = "#{uri}/#{token}" if send_token
+
     headers = {}
-    headers['Cookie'] = @cookies if @cookies
-    #puts uri, headers
-    resp = @http.get uri, headers	
-    c = resp.to_hash['set-cookie']
-    @cookies = @cookies.to_s + c.collect{|ea|ea[/^.*?;/]}.join if c
+    headers['Cookie'] = HTTP::Cookie.cookie_value(@jar.cookies(url))
+    headers['Authorization'] = "Bearer #{token}"
+
+    resp = @http.get url, headers	
+
+    cookies_set = resp.to_hash['set-cookie']
+    if cookies_set then
+      cookies_set.each { |value| @jar.parse(value, url) }
+    end
+
     res = JSON.parse resp.body
     return res
-    if res['success'] then
-      return res
-    else
-      @last_err = res
-      return nil
+
+  end
+
+  def post(rest, data, send_token=true, token = "")
+    url = "https://leekwars.com/api/#{rest}"
+
+    token = (token.length > 0) ? token : @token
+
+    headers = {}
+    headers['Cookie'] = HTTP::Cookie.cookie_value(@jar.cookies(url))
+    headers['Authorization'] = "Bearer #{token}"
+
+    resp = @http.post url, data.to_json, headers	
+    
+    cookies_set = resp.to_hash['set-cookie']
+    if cookies_set then
+      cookies_set.each { |value| @jar.parse(value, url) }
     end
+
+    res = JSON.parse resp.body
+
+    return res
   end
 
   def do_solo_fight(leek_id)
     #garden = get('garden/get')['garden']
     #targets = garden['solo_enemies'][leek_id.to_s]
-	opponents = get( "garden/get-leek-opponents/#{leek_id}" )['opponents']
+	  opponents = get( "garden/get-leek-opponents/#{leek_id}" )['opponents']
     return nil unless opponents.length > 0
     target_id = opponents.first['id']
     r = get "garden/start-solo-fight/#{leek_id}/#{target_id}"
