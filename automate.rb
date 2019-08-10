@@ -30,13 +30,25 @@ def do_register(tokens)
 		puts "--- Farmer: #{farmer} ---------"
 		api = LeekAPI.new token
 		puts "--- register-tournament"
-		api.get "farmer/register-tournament"
-		api.leeks.each do |leek|
-			api.get "leek/register-tournament/#{leek}"
+		begin
+			api.get "farmer/register-tournament"
+		rescue RuntimeError => e
+			puts e
 		end
-		api.garden['my_compositions'].map{|x|x['id']}.each do |compo_id|
+		api.leeks.each do |leek|
+			begin
+				api.get "leek/register-tournament/#{leek}"
+			rescue RuntimeError => e
+				puts e
+			end
+		end
+		api.get_garden['my_compositions'].map{|x|x['id']}.each do |compo_id|
 			puts "--- register-team #{compo_id}"
-			api.get "team/register-tournament/#{compo_id}"
+			begin
+				api.get "team/register-tournament/#{compo_id}"
+			rescue RuntimeError => e
+				puts e
+			end
 		end
 	end
 end

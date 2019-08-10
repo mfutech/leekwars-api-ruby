@@ -101,6 +101,9 @@ class LeekAPI
     end
 
     res = JSON.parse resp.body
+    
+    raise RuntimeError, resp.body if res.class != Hash
+    raise RuntimeError, res['error'] if res.has_key? 'error'
     return res
 
   end
@@ -122,7 +125,7 @@ class LeekAPI
     end
 
     res = JSON.parse resp.body
-
+    raise RuntimeError, res['error'] if res.has_key? 'error'
     return res
   end
 
@@ -164,8 +167,7 @@ class LeekAPI
 
   def do_team_fights
     failed = 0 ## max number of failed figth submission
-    garden = get_garden
-    puts "---#{garden}---"
+    garden = get_garden()
     garden['my_compositions'].each do |composition|
       compo_id = composition['id']
       for i in (1..20) do  ## do 20 fights at most 
@@ -173,10 +175,14 @@ class LeekAPI
         opponents = get( "garden/get-composition-opponents/#{compo_id}" )['opponents']
         break unless opponents
         opponents.each do |opponent|
-          r = get "garden/start-team-fight/#{compo_id}/#{opponent['id']}"
-          failed += 1 unless r['success']
-          break if failed > 20
-          puts r				
+          begin
+            r = get "garden/start-team-fight/#{compo_id}/#{opponent['id']}"
+            failed += 1 unless r['success']
+            break if failed > 20
+            puts r				
+          rescue RuntimeError => e
+            puts e  
+          end
         end
       end
     end
