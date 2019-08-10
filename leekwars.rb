@@ -5,11 +5,10 @@ require 'http-cookie'
 
 class LeekAPI
   LeekAPI::BASE_URI = URI("https://leekwars.com")
-  attr_accessor :http, :token, :jar, :farmer
+  attr_accessor :http, :token, :jar
 
   def initialize(token = nil)
     @token = token
-    @garden = nil
     @leeks = nil
     @farmer = nil
     @jar = HTTP::CookieJar.new
@@ -28,10 +27,15 @@ class LeekAPI
     @http.finish
   end
   
-  def garden
+  def get_garden
     r = get 'garden/get'
-    return r if r 
+    return r['garden'] if r 
     raise r
+  end
+
+  def dis_garden
+    @garden = get_garden unless @garden
+    return @garden
   end
   
   def leeks
@@ -145,11 +149,12 @@ class LeekAPI
     #r = api.post "garden/start-solo-fight", data
     puts r
   end
+
   def do_farmer_fights
     while true do
-      enemies = garden['farmer_enemies']
-	  opponents = get( "garden/get-farmer-opponents" )['opponents']
-      break unless opponents.length > 0
+      #enemies = garden['farmer_enemies']
+	    opponents = get( "garden/get-farmer-opponents" )['opponents']
+      break unless opponents && opponents.length > 0
       farmer_id = opponents.first['id']
       r = get "garden/start-farmer-fight/#{farmer_id}"
       #r = api.post "garden/start-solo-fight", data
@@ -159,18 +164,20 @@ class LeekAPI
 
   def do_team_fights
     failed = 0 ## max number of failed figth submission
+    garden = get_garden
+    puts "---#{garden}---"
     garden['my_compositions'].each do |composition|
       compo_id = composition['id']
       for i in (1..20) do  ## do 20 fights at most 
-		#enemies = garden['enemies_compositions'][compo_id.to_s]
-		opponents = get( "garden/get-composition-opponents/#{compo_id}" )['opponents']
-		break unless opponents
-		opponents.each do |opponent|
-		  r = get "garden/start-team-fight/#{compo_id}/#{opponent['id']}"
-		  failed += 1 unless r['success']
-		  break if failed > 20
-		  puts r				
-		end
+        #enemies = garden['enemies_compositions'][compo_id.to_s]
+        opponents = get( "garden/get-composition-opponents/#{compo_id}" )['opponents']
+        break unless opponents
+        opponents.each do |opponent|
+          r = get "garden/start-team-fight/#{compo_id}/#{opponent['id']}"
+          failed += 1 unless r['success']
+          break if failed > 20
+          puts r				
+        end
       end
     end
   end
