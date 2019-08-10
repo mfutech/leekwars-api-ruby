@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## beta 008
+- update to API change, adapt login method
+- rework cookie handling
+
 ## beta 007
 - reused automate.rb in scheduler.rb
 

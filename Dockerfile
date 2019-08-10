@@ -25,7 +25,12 @@ WORKDIR /usr/app
 
 COPY Gemfile /usr/app/ 
 COPY Gemfile.lock /usr/app/ 
-RUN bundle install
+
+RUN apk --update add --virtual build_deps \
+    build-base ruby-dev libc-dev linux-headers \
+    openssl-dev postgresql-dev libxml2-dev libxslt-dev && \
+    bundle install && \
+    apk del build_deps
 
 COPY . /usr/app
 
