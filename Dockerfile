@@ -1,5 +1,5 @@
-FROM alpine:3.3
-MAINTAINER Mfu Tech <mfutech@gmail.com>
+FROM alpine:3.10.1
+LABEL maintainer="mfutech@gmail.com"
 
 ## working TimeZone
 ENV TZ Europe/Zurich

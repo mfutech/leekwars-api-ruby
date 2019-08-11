@@ -1,0 +1,9 @@
+.git*
+.docker*
+config.yml
+config/*.yml
+Dockerfile
+_*
+*.txt
+*.md
+!README.md

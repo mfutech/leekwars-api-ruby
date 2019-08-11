@@ -12,8 +12,12 @@ tokens = config[:tokens]
 
 tokens.each do |farmer, token|
 	api = LeekAPI.new token
-	res = api.get 'garden/get'
-	puts "#{farmer}, success: #{res['success']}"
+	begin
+		res = api.get 'garden/get'
+		puts "#{farmer}, success: #{res['success']}"
+	rescue RuntimeError => e
+		puts "Cannot Connect: #{e}"
+	end
 end
 
 
